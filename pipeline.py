@@ -29,6 +29,7 @@ lr_params = {
     'n_jobs':       -1,
 }
 
+
 # ── Manual/default model hyperparameters (untuned) ────────
 
 rf_params = {
@@ -183,7 +184,7 @@ def find_best_model(df):
 
 
 def feature_importance_dataset(X, y, title="Feature Importance"):
-    # correlation-based proxy; tree models' .feature_importances_ is more accurate for them
+    # correlation-based proxy; use feature_importance_models() below for tree models instead
     correlations = pd.concat([X, y], axis=1).corr()[y.name].drop(y.name)
     feature_importance = correlations.abs().sort_values(ascending=False)
 
@@ -196,14 +197,40 @@ def feature_importance_dataset(X, y, title="Feature Importance"):
     plt.xlabel("Correlation Strength")
     plt.ylabel("Features")
     plt.tight_layout()
-    plt.show()
+    plt.savefig("dataset_feature_correlation.png")
 
     return feature_importance
 
+
+def feature_importance_models(trained_models, X):
+    # actual model-derived importances (tree models only; LR pipeline has no .feature_importances_)
+    importances = {}
+    for name, model in trained_models.items():
+        if hasattr(model, "feature_importances_"):
+            imp = pd.Series(model.feature_importances_, index=X.columns).sort_values(ascending=False)
+            importances[name] = imp
+
+            print("\n" + "="*50)
+            print(f"FEATURE IMPORTANCE — {name}")
+            print("="*50)
+            print(imp)
+
+            imp.plot(kind='barh', figsize=(10, 6), title=f"Feature Importance — {name}")
+            plt.xlabel("Importance")
+            plt.ylabel("Features")
+            plt.gca().invert_yaxis()
+            plt.tight_layout()
+            plt.savefig(f"{name}_feature_importance.png")   # unique filename per model, otherwise each loop overwrites the last
+            plt.close()
+
+    return importances
+
 # ── Run ───────────────────────────────────────────────────
 
-trained_models = train_models(models, X_train, y_train)
-val_df, val_results = val_eval(trained_models, X_train, y_train, X_val, y_val)
-test_df, test_results = test_eval(trained_models, X_train, y_train, X_test, y_test)
-best_model_name = find_best_model(val_df)
-feature_importance_dataset(X, y)
+if __name__ == "__main__":
+    trained_models = train_models(models, X_train, y_train)
+    val_df, val_results = val_eval(trained_models, X_train, y_train, X_val, y_val)
+    test_df, test_results = test_eval(trained_models, X_train, y_train, X_test, y_test)
+    best_model_name = find_best_model(val_df)
+    feature_importance_dataset(X, y)
+    feature_importance_models(trained_models, X)
