@@ -4,7 +4,9 @@ Binary classification pipeline that trains and compares five models (Logistic Re
 
 ## Dataset
 
-`heart_disease_risk_dataset_earlymed.csv` — binary symptom/lifestyle flags (Chest_Pain, Fatigue, Dizziness, etc.) plus Age and Gender, with a balanced 50/50 target split. Not included in this repo — place it in the project root before running.
+`heart_disease_risk_dataset_earlymed.csv` — binary symptom/lifestyle flags (Chest_Pain, Fatigue, Dizziness, etc.) plus Age and Gender, with a balanced 50/50 target split.
+
+Source: [Heart Disease Risk Prediction Dataset on Kaggle](https://www.kaggle.com/datasets/mahatiratusher/heart-disease-risk-prediction-dataset). Not included in this repo — download it and place it in the project root before running.
 
 ## Pipeline
 
